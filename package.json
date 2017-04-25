@@ -1,0 +1,17 @@
+{
+  "name": "Telegram-bot-2",
+  "version": "1.0.0",
+  "description": "A sample Node.js Telegram bot",
+  "engines": {
+    "node": "6.10.2",
+    "npm": "3.10.9"
+  },
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "telebot": "1.0.7"
+  },
+  "license": "MIT"
+}
