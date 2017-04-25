@@ -9,7 +9,8 @@ const bot = new telebot(TOKEN);
 const port = 4000;
 const dirForUsers = "DataBase";
 const counterFileName = "counter.json";
-const lastMessage = "Спасибо! Ты прошел подготовку."
+const lastMessage = "Спасибо! Ты прошел подготовку.";
+const restartMessage = "Данные сброшены.\nНачните вновь, введя команду /start";
 
 function myRequire(url) {
 	let str, obj;
@@ -82,6 +83,16 @@ function sendMessage(stepObj, msg) {
 	bot.sendMessage(msg.from.id, text, { markup, parse: "Markdown" })
 }
 
+bot.on("/restart", msg => {
+	let username = msg.from.username;
+	const pathToDir = `./${dirForUsers}/${username}/`;
+	try {
+		fs.unlinkSync(pathToDir + counterFileName);
+		fs.rmdirSync(pathToDir);
+	} catch(e) {}
+	return bot.sendMessage(msg.from.id, restartMessage);
+});
+
 bot.on("/start", msg => {
 	console.log(msg);
 	// Создать папку и файлы для пользователя, если пользователь новый
@@ -105,6 +116,7 @@ bot.on("/start", msg => {
 });
 
 bot.on("text", msg => {
+	console.log(msg);
 	// Проверять, что введенный текст - не команда
 	if (Array.isArray(msg.entities)) {
 		if (msg.entities[0].type == "bot_command") {
@@ -112,7 +124,18 @@ bot.on("text", msg => {
 		}
 	}
 
-	console.log(msg.from.id);
+	try {
+		let username = msg.from.username;
+		let pathToDir = `./${dirForUsers}/${username}/`;
+
+		fs.mkdirSync(pathToDir);
+		// Создать новые файлы со счетчиком вопросов и с ответами
+		let data = JSON.stringify({"question": "1"});
+		fs.writeFileSync(`${pathToDir}/${counterFileName}`, data);
+
+		let stepObj = findAnswer(msg);
+		return sendMessage(stepObj, msg);
+	} catch (e) {}
 
 	if (checkToEnd(msg)) return;
 	// +1 к counterFileName
